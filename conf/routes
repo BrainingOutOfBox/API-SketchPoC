@@ -4,6 +4,7 @@
 
 # An example controller showing a sample home page
 GET     /                           controllers.HomeController.emptySite()
+POST    /jsonParse                  controllers.HomeController.jsonParse()
 
 POST    /upload                     controllers.HomeController.upload()
 POST    /uploadLarge                controllers.HomeController.uploadLargeData()

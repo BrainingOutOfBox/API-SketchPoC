@@ -4,6 +4,7 @@ package controllers;
 import akka.stream.javadsl.FileIO;
 import akka.stream.javadsl.Source;
 import akka.util.ByteString;
+import dto.BrainstormingFindingDTO;
 import play.data.Form;
 import play.http.HttpEntity;
 import play.i18n.Messages;
@@ -100,6 +101,12 @@ public class HomeController extends Controller {
     public Result downloadLargeData2(String id) throws ExecutionException, InterruptedException {
         byte[] result = service.downloadFileAsStream(id);
         return ok(result);
+    }
+
+    @BodyParser.Of(MyFindingDTOBodyParser.class)
+    public Result jsonParse(){
+        BrainstormingFindingDTO brainstormingFindingDTO = request().body().as(BrainstormingFindingDTO.class);
+        return ok(brainstormingFindingDTO.getName() +", "+ brainstormingFindingDTO.getProblemDescription() +", "+ brainstormingFindingDTO.getNrOfIdeas() +", "+  brainstormingFindingDTO.getBaseRoundTime() +", "+ brainstormingFindingDTO.getBrainsheets());
     }
 
 
