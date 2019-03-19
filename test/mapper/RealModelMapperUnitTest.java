@@ -2,6 +2,7 @@ package mapper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dto.BrainsheetDTO;
@@ -15,6 +16,7 @@ import entity.Idea;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 
@@ -22,7 +24,7 @@ public class RealModelMapperUnitTest {
 
     @Test
     public void brainstormingDTOToBrainstormingTest(){
-        BrainstormingFindingDTO brainstormingFindingDTO = createBrainstormFindingDTO();
+        BrainstormingFindingDTO brainstormingFindingDTO = createBrainstormingFindingDTO(4);
 
         RealModelMapper modelMapper = new RealModelMapper();
         BrainstormingFinding brainstormingFinding = modelMapper.toBrainstormingFinding(brainstormingFindingDTO);
@@ -36,7 +38,7 @@ public class RealModelMapperUnitTest {
 
     @Test
     public void brainstormingToBrainstormingDTOTest(){
-        BrainstormingFinding brainstormingFinding = createBrainstormingFinding();
+        BrainstormingFinding brainstormingFinding = createBrainstormingFinding(3);
 
         RealModelMapper modelMapper = new RealModelMapper();
         BrainstormingFindingDTO brainstormingFindingDTO = modelMapper.toBrainstormingFindingDTO(brainstormingFinding);
@@ -52,7 +54,7 @@ public class RealModelMapperUnitTest {
         RealJsonMapper jsonMapper = new RealJsonMapper();
         RealModelMapper modelMapper = new RealModelMapper();
 
-        JsonNode json = createJsonNode();
+        JsonNode json = createBrainstormingFindingJsonNode(2);
         BrainstormingFindingDTO brainstormingFindingDTO = jsonMapper.toDTO(json);
         BrainstormingFinding brainstormingFinding = modelMapper.toBrainstormingFinding(brainstormingFindingDTO);
 
@@ -67,7 +69,7 @@ public class RealModelMapperUnitTest {
     public void brainstormingFindingToJsonNodeTest(){
         RealJsonMapper jsonMapper = new RealJsonMapper();
         RealModelMapper modelMapper = new RealModelMapper();
-        BrainstormingFinding brainstormingFinding = createBrainstormingFinding();
+        BrainstormingFinding brainstormingFinding = createBrainstormingFinding(2);
 
         BrainstormingFindingDTO brainstormingFindingDTO = modelMapper.toBrainstormingFindingDTO(brainstormingFinding);
         JsonNode json = jsonMapper.toJson(brainstormingFindingDTO);
@@ -80,61 +82,136 @@ public class RealModelMapperUnitTest {
     }
 
 
-    private BrainstormingFindingDTO createBrainstormFindingDTO(){
-        IdeaDTO ideaDTO = new IdeaDTO("DemoTestDTO");
-        ArrayList<IdeaDTO> ideaDTOS = new ArrayList<>();
-        ideaDTOS.add(ideaDTO);
-
-
-        BrainwaveDTO brainwaveDTO = new BrainwaveDTO(0, ideaDTOS);
-        ArrayList<BrainwaveDTO> brainwaveDTOS = new ArrayList<>();
-        brainwaveDTOS.add(brainwaveDTO);
-
-        BrainsheetDTO brainsheetDTO = new BrainsheetDTO(0, brainwaveDTOS);
-        ArrayList<BrainsheetDTO> brainsheetDTOS = new ArrayList<>();
-        brainsheetDTOS.add(brainsheetDTO);
+    private BrainstormingFindingDTO createBrainstormingFindingDTO(int amountOfBrainsheetDTOs){
+        ArrayList<BrainsheetDTO> brainsheetDTOS = createBrainsheetsDTO(amountOfBrainsheetDTOs);
 
         BrainstormingFindingDTO brainstormingFindingDTO = new BrainstormingFindingDTO("DemoTestDTO", "DemoDTO", 1, 2, 0, "", brainsheetDTOS, 0, "");
         return  brainstormingFindingDTO;
     }
 
-    private BrainstormingFinding createBrainstormingFinding(){
-        Idea idea = new Idea("DemoTestBO");
-        ArrayList<Idea> ideas = new ArrayList<>();
-        ideas.add(idea);
+    private ArrayList<BrainsheetDTO> createBrainsheetsDTO(int amount){
+        ArrayList<BrainsheetDTO> brainsheetDTOS = new ArrayList<>();
+        for (int i = 0; i < amount; i++){
+            BrainsheetDTO brainsheetDTO = new BrainsheetDTO(i, createBrainwavesDTO(amount));
+            brainsheetDTOS.add(brainsheetDTO);
+        }
+        return brainsheetDTOS;
+    }
+
+    private ArrayList<BrainwaveDTO> createBrainwavesDTO(int amount){
+        ArrayList<BrainwaveDTO> brainwaveDTOS = new ArrayList<>();
+        for (int i = 0; i < amount; i++){
+            BrainwaveDTO brainwaveDTO = new BrainwaveDTO(i, createBrainstormingIdeasDTO(amount));
+            brainwaveDTOS.add(brainwaveDTO);
+        }
+        return brainwaveDTOS;
+    }
+
+    private ArrayList<IdeaDTO> createBrainstormingIdeasDTO(int amount){
+        ArrayList<IdeaDTO> ideaDTOS = new ArrayList<>();
+        for (int i = 0; i < amount; i++){
+            IdeaDTO ideaDTO = new IdeaDTO(generateRandomText(5));
+            ideaDTOS.add(ideaDTO);
+        }
+        return ideaDTOS;
+    }
 
 
-        Brainwave brainwave = new Brainwave(0, ideas);
-        ArrayList<Brainwave> brainwaves = new ArrayList<>();
-        brainwaves.add(brainwave);
 
-        Brainsheet brainsheet = new Brainsheet(0, brainwaves);
-        ArrayList<Brainsheet> brainsheets = new ArrayList<>();
-        brainsheets.add(brainsheet);
+
+    private BrainstormingFinding createBrainstormingFinding(int amountOfBrainsheets){
+        ArrayList<Brainsheet> brainsheets = createBrainsheets(amountOfBrainsheets);
 
         BrainstormingFinding brainstormingFinding = new BrainstormingFinding("DemoTestBO", "DemoBO", 1, 2, 0, "", brainsheets, 0, "");
         return  brainstormingFinding;
     }
 
-    private JsonNode createJsonNode(){
-        JsonNode idea = JsonNodeFactory.instance.objectNode();
-        ((ObjectNode) idea).put("description", "DemoTestJson");
+    private ArrayList<Brainsheet> createBrainsheets(int amount){
+        ArrayList<Brainsheet> brainsheets = new ArrayList<>();
+        for (int i = 0; i < amount; i++){
+            Brainsheet brainsheet = new Brainsheet(i, createBrainwaves(amount));
+            brainsheets.add(brainsheet);
+        }
+        return brainsheets;
+    }
 
-        JsonNode brainwave = JsonNodeFactory.instance.objectNode();
-        ((ObjectNode) brainwave).put("nrOfBrainwave", 0);
-        ((ObjectNode) brainwave).putArray("ideas").add(idea);
+    private ArrayList<Brainwave> createBrainwaves(int amount){
+        ArrayList<Brainwave> brainwaves = new ArrayList<>();
+        for (int i = 0; i < amount; i++){
+            Brainwave brainwave = new Brainwave(i, createBrainstormingIdeas(amount));
+            brainwaves.add(brainwave);
+        }
+        return brainwaves;
+    }
 
-        JsonNode brainsheet = JsonNodeFactory.instance.objectNode();
-        ((ObjectNode) brainsheet).put("nrOfSheet", 0);
-        ((ObjectNode) brainsheet).putArray("brainwaves").add(brainwave);
+    private ArrayList<Idea> createBrainstormingIdeas(int amount){
+        ArrayList<Idea> ideas = new ArrayList<>();
+        for (int i = 0; i < amount; i++){
+            Idea idea = new Idea(generateRandomText(5));
+            ideas.add(idea);
+        }
+        return ideas;
+    }
 
+
+
+    private JsonNode createBrainstormingFindingJsonNode(int amountOfBrainsheetsJson){
         JsonNode finding = JsonNodeFactory.instance.objectNode();
         ((ObjectNode) finding).put("name", "DemoTestJson");
         ((ObjectNode) finding).put("problemDescription", "DemoTestJson");
-        ((ObjectNode) finding).put("nrOfIdeas", 1);
+        ((ObjectNode) finding).put("nrOfIdeas", amountOfBrainsheetsJson);
         ((ObjectNode) finding).put("baseRoundTime", 3);
-        ((ObjectNode) finding).putArray("brainsheets").add(brainsheet);
+        ((ObjectNode) finding).putArray("brainsheets").addAll(createBrainsheetJson(amountOfBrainsheetsJson));
 
         return finding;
+    }
+
+    private ArrayNode createBrainsheetJson(int amount){
+        ArrayNode brainsheetArray = JsonNodeFactory.instance.arrayNode();
+        for (int i = 0; i < amount; i++){
+            ObjectNode brainsheet = JsonNodeFactory.instance.objectNode();
+            brainsheet.put("nrOfSheet", i);
+            brainsheet.putArray("brainwaves").addAll(createBrainwaveJson(amount));
+            brainsheetArray.add(brainsheet);
+        }
+
+        return brainsheetArray;
+    }
+
+    private ArrayNode createBrainwaveJson(int amount){
+        ArrayNode brainwaveArray = JsonNodeFactory.instance.arrayNode();
+        for (int i = 0; i < amount; i++){
+            ObjectNode brainwave = JsonNodeFactory.instance.objectNode();
+            brainwave.put("nrOfBrainwave", i);
+            brainwave.putArray("ideas").addAll(createBrainstormingIdeasJson(amount));
+            brainwaveArray.add(brainwave);
+        }
+
+        return brainwaveArray;
+    }
+
+    private ArrayNode createBrainstormingIdeasJson(int amount){
+        ArrayNode ideaArray = JsonNodeFactory.instance.arrayNode();
+        for (int i = 0; i < amount; i++){
+            ObjectNode idea = JsonNodeFactory.instance.objectNode();
+            idea.put("description", generateRandomText(5));
+            ideaArray.add(idea);
+        }
+
+        return ideaArray;
+    }
+
+
+
+    private String generateRandomText(int length){
+        Random random = new Random();
+        String alphabet = "abcdefghijklmnopjrstuvwxyz0123456789";
+        StringBuilder randomString = new StringBuilder();
+
+        for (int i = 0; i < length; i++){
+            randomString.append(alphabet.charAt(random.nextInt(alphabet.length())));
+        }
+
+        return randomString.toString();
     }
 }
